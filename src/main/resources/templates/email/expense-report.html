@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Report</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="padding: 40px 40px 20px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px 12px 0 0;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Expense Report</h1>
+                            <p style="margin: 10px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 14px;">
+                                <span th:text="${username}">Username</span> &bull; 
+                                <span th:if="${startDate != null and endDate != null}" th:text="${#temporals.format(startDate, 'MMM dd, yyyy')} + ' - ' + ${#temporals.format(endDate, 'MMM dd, yyyy')}">Date Range</span>
+                                <span th:unless="${startDate != null and endDate != null}">All Time</span>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Summary Section -->
+                    <tr>
+                        <td style="padding: 30px 40px;">
+                            <h2 style="margin: 0 0 20px 0; color: #1a1a2e; font-size: 18px; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Summary</h2>
+                            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 15px 20px; background-color: #f8f9ff; border-radius: 8px; text-align: center;">
+                                        <p style="margin: 0; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Total Expenses</p>
+                                        <p style="margin: 8px 0 0 0; color: #667eea; font-size: 32px; font-weight: 700;">₹<span th:text="${#numbers.formatDecimal(totalAmount, 1, 2)}">0.00</span></p>
+                                    </td>
+                                    <td style="width: 20px;"></td>
+                                    <td style="padding: 15px 20px; background-color: #f0fdf4; border-radius: 8px; text-align: center;">
+                                        <p style="margin: 0; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Total Transactions</p>
+                                        <p style="margin: 8px 0 0 0; color: #22c55e; font-size: 32px; font-weight: 700;" th:text="${expenseCount}">0</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Category Breakdown -->
+                    <tr th:if="${!categorySummary.isEmpty()}">
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 20px 0; color: #1a1a2e; font-size: 18px; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Category Breakdown</h2>
+                            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                <tr th:each="category : ${categorySummary}">
+                                    <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                                        <table role="presentation" style="width: 100%;">
+                                            <tr>
+                                                <td style="width: 50%;">
+                                                    <p style="margin: 0; color: #334155; font-size: 14px; font-weight: 500;" th:text="${category.categoryName}">Category</p>
+                                                </td>
+                                                <td style="width: 25%; text-align: right;">
+                                                    <p style="margin: 0; color: #64748b; font-size: 13px;" th:text="${#numbers.formatDecimal(category.percentage, 1, 1)} + '%'">0%</p>
+                                                </td>
+                                                <td style="width: 25%; text-align: right;">
+                                                    <p style="margin: 0; color: #667eea; font-size: 14px; font-weight: 600;">₹<span th:text="${#numbers.formatDecimal(category.totalAmount, 1, 2)}">0.00</span></p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3" style="padding-top: 8px;">
+                                                    <div style="background-color: #e2e8f0; border-radius: 4px; height: 6px; overflow: hidden;">
+                                                        <div th:style="'width: ' + ${category.percentage} + '%; background: linear-gradient(90deg, #667eea, #764ba2); height: 100%; border-radius: 4px;'"></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Recent Expenses -->
+                    <tr th:if="${!expenses.isEmpty()}">
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 20px 0; color: #1a1a2e; font-size: 18px; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Expense Details</h2>
+                            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                <tr style="background-color: #f8f9ff;">
+                                    <th style="padding: 12px 10px; text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Date</th>
+                                    <th style="padding: 12px 10px; text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Description</th>
+                                    <th style="padding: 12px 10px; text-align: left; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Category</th>
+                                    <th style="padding: 12px 10px; text-align: right; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Amount</th>
+                                </tr>
+                                <tr th:each="expense : ${expenses}">
+                                    <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 13px;" th:text="${#temporals.format(expense.date, 'MMM dd')}">Jan 01</td>
+                                    <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; color: #334155; font-size: 13px; font-weight: 500;" th:text="${expense.description}">Description</td>
+                                    <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0;">
+                                        <span style="display: inline-block; padding: 4px 10px; background-color: #f0f9ff; color: #0369a1; font-size: 11px; border-radius: 20px; font-weight: 500;" th:text="${expense.categoryName}">Category</span>
+                                    </td>
+                                    <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; color: #667eea; font-size: 13px; font-weight: 600; text-align: right;">₹<span th:text="${#numbers.formatDecimal(expense.amount, 1, 2)}">0.00</span></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f8f9ff; border-radius: 0 0 12px 12px; text-align: center;">
+                            <p style="margin: 0; color: #64748b; font-size: 12px;">This report was generated automatically by Expense Tracker</p>
+                            <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 11px;" th:text="'Generated on ' + ${#temporals.format(generatedAt, 'MMMM dd, yyyy ''at'' hh:mm a')}">Generated on January 01, 2026</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
